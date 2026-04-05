@@ -1,0 +1,40 @@
+# Core dependencies
+flask>=2.3.0
+requests>=2.31.0
+python-dotenv>=1.0.0
+
+# AI/ML - choose what's needed
+# Ollama support (local, FREE)
+# ollama (auto-installed)
+
+# Optional: Google AI
+# google-generativeai>=0.3.0
+
+# Optional: OpenAI
+# openai>=1.0.0
+
+# Optional: Anthropic
+# anthropic>=0.18.0
+
+# Voice - TTS (free offline)
+pyttsx3>=2.90
+gTTS>=2.4.0
+
+# Voice - STT (local)
+# faster-whisper>=0.10.0
+
+# Memory storage
+# sqlite3 (built-in)
+
+# WebSocket for remote control
+# websocket-client>=1.6.0
+
+# Google services (optional)
+# google-auth>=2.23.0
+# google-api-python-client>=2.100.0
+
+# MCP integration (optional)
+# mcp>=1.0.0
+
+# Async support
+asyncio (built-in)
