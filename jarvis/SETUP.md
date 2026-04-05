@@ -1,29 +1,21 @@
-# 🤖 Jarvis Unified v2 - Complete Setup Guide
+# 🤖 Jarvis Unified v3 - Complete Setup Guide
 
-**100% FREE, modular AI assistant with all requested features**
+**100% FREE - Tron UI + Food Agent + Self-Learning + SMS + Brain Viz**
 
 ---
 
-## ✅ What's Included (All Free!)
+## ✅ All Features Included
 
 | Feature | Status | Free? |
 |---------|--------|-------|
-| AI Chat (Ollama/Gemini/OpenRouter) | ✅ | YES - Ollama is 100% free |
-| Voice TTS/STT | ✅ | pyttsx3 is FREE |
-| Custom Tone (humorous/sassy/etc) | ✅ | YES |
-| Wake Commands | ✅ | YES |
-| Google Calendar | ✅ | YES (OAuth) |
-| Gmail Integration | ✅ | YES (OAuth) |
-| To-Do List | ✅ | YES |
-| Screen Share Toggle | ✅ | YES (on-demand) |
-| Gesture Learning | ✅ | YES |
-| Browser Control (Chrome/Edge) | ✅ | YES |
-| Automated Emails | ✅ | YES |
-| GitHub Commit Summary | ✅ | YES |
-| Mobile-Friendly UI | ✅ | YES |
-| Theme Customization | ✅ | YES |
-| Speech Visual Display | ✅ | YES |
-| Memory & Preferences | ✅ | YES |
+| **Tron-Style UI** | ✅ Futuristic cyberpunk | YES |
+| **Voice + Text Input** | ✅ Seamless switching | YES |
+| **Food Agent** | ✅ Grocery ordering, recipes, timers | YES |
+| **Self-Learning** | ✅ Grades responses, improves | YES |
+| **Brain Visualization** | ✅ See agent connections | YES |
+| **Dashboard Analytics** | ✅ Tasks, stats, workflow | YES |
+| **SMS via Gmail** | ✅ Free carrier gateway | YES |
+| **Security Confirmations** | ✅ Explicit confirmations | YES |
 
 ---
 
@@ -42,20 +34,17 @@ source venv/bin/activate  # or venv\Scripts\activate on Windows
 pip install -r jarvis/requirements.txt
 ```
 
-### 3. Configure for 100% FREE
+### 3. Configure (100% FREE)
 ```bash
 cp jarvis/.env.example jarvis/.env
 
-# EDIT .env - for completely FREE usage:
-# 
-# 1. Install Ollama (https://ollama.com)
-# 2. Run: ollama serve  
+# For 100% FREE:
+# 1. Install Ollama: https://ollama.com
+# 2. Run: ollama serve
 # 3. Run: ollama pull qwen3:8b
-# 4. In .env set:
+# 4. In .env:
 #    AI_PROVIDER=ollama
 #    OLLAMA_MODEL=qwen3:8b
-# 
-# Leave other API keys EMPTY for 100% free mode!
 ```
 
 ### 4. Run
@@ -70,109 +59,223 @@ http://localhost:5000
 
 ---
 
-## 🎛️ Features Guide
+## 🎮 TRON UI Features
 
-### 🎤 Voice Setup
+### Visual Style
+- **Cyberpunk/Tron aesthetic** - Glowing cyan (#00ffff)
+- **Scanline effect** - Retro-futuristic
+- **Animated grid background**
+- **Pulsing status indicators**
+
+### Input Modes
 ```bash
-# Install voice dependencies
-pip install pyttsx3 pyaudio
+# Toggle between voice and text
+INPUT_MODE=text   # or voice
 
-# In .env:
-TTS_ENGINE=pyttsx3
-STT_ENGINE=whisper
-WAKE_WORD=Jarvis
-CUSTOM_WAKE_COMMANDS=Hey Jarvis,Computer,Assistant
+# In UI: Click the ⌨️/🎤 button to switch
 ```
 
-### 🎨 Customize Tone
-In `.env`:
-```bash
-JARVIS_TONE=humorous   # funny, adds jokes
-JARVIS_TONE=sassy     # direct, witty
-JARVIS_TONE=formal    # professional
-JARVIS_TONE=friendly  # warm
+### Mobile Support
+- Fully responsive design
+- Swipe-friendly navigation
+- Touch-optimized buttons
+
+---
+
+## 🍔 Food Agent
+
+### What It Does
+1. **Grocery Ordering** - Add items to cart from Walmart/Instacart/DoorDash
+2. **Recipe Lookup** - Get ingredients and step-by-step
+3. **Cooking Timers** - Set timers for recipes
+
+### Usage Examples
+```
+You: Order milk, eggs, bread
+Jarvis: 📝 Added to Walmart cart:
+• milk, eggs, bread
+
+⚠️ CONFIRMATION REQUIRED: Proceed to checkout?
+
+You: How to make pasta?
+Jarvis: 🍳 Pasta Recipe:
+• Ingredients: pasta, sauce, cheese
+• Steps: 3 | Time: 20 min
+
+You: Set timer for 10 minutes
+Jarvis: ⏱️ Timer set for 10 minutes!
 ```
 
-### 🎯 Customize UI
-```bash
-THEME=dark        # or light
-ACCENT_COLOR=#3b82f6  # any hex color
-SHOW_SPEECH_VISUAL=true
+### Security
+- **Always confirms** before any order
+- **CONFIRM_ORDERS=true** in config
+- Shows items and store before checkout
+
+---
+
+## 🧠 Self-Learning System
+
+### How It Works
+1. Every response is logged
+2. You can grade responses 1-5
+3. Jarvis analyzes patterns
+4. Improves system prompt over time
+
+### Usage
+```
+# After each response, grade buttons appear:
+[1] [2] [3] [4] [5]
+
+# Jarvis tracks:
+- Total responses
+- Average grade
+- Trend (improving/declining)
+- Pattern suggestions
 ```
 
-### 📅 Google Calendar/Gmail
-1. Go to https://console.cloud.google.com
-2. Create project → Enable Gmail API, Calendar API, Drive API
-3. Create OAuth credentials (Web application)
-4. Get Client ID + Secret → put in .env
-5. Get refresh token (see docs/google-oauth.md)
-6. Put refresh token in .env
+### Stats
+View in dashboard - shows your grading history and Jarvis's learning progress!
 
-### 🌐 Browser Control
-```bash
-DEFAULT_BROWSER=chrome  # chrome, edge, firefox
+---
+
+## 🧠 Brain Visualization
+
+### What You See
+- All active agents and their connections
+- Real-time workflow visualization
+- Node interactions
+
+### Agents Displayed
+```
+CORE → MEMORY → LEARNING
+  ↓       ↓        ↓
+VOICE → FOOD → GOOGLE
+  ↓       ↓        ↓
+BROWSER → SMS → CALENDAR
 ```
 
-### 👋 Gesture Learning
-Teach Jarvis hand gestures via the UI (Settings → Gestures)
-- "Wave left" → "previous window"
-- "Thumbs up" → "confirm"
+---
 
-### 📺 Screen Share
-Toggle in UI - only activates when you turn it on (privacy!)
+## 📊 Dashboard
 
-### ⚡ Automations
+### Stats Shown
+- **Tasks** - Pending vs completed
+- **Learning** - Grade average, trend
+- **Brain** - Active nodes, connections
+- **Agents** - How many running
+
+---
+
+## 📱 SMS via Gmail (FREE)
+
+### How It Works
+- Uses carrier email gateways (free)
+- verizon → @vtext.com
+- att → @txt.att.net
+- tmobile → @tmomail.net
+- sprint → @messaging.sprintpcs.com
+
+### Security
+- **CONFIRM_SMS=true** (default)
+- Always asks before sending
+- Shows preview before confirm
+
+### Example
+```
+You: Send text to mom "Call me"
+Jarvis: ⚠️ CONFIRMATION REQUIRED:
+Send SMS to mom:
+"Call me"
+
+Reply 'yes' to confirm
+```
+
+---
+
+## 🔒 Security Features
+
+All sensitive actions require explicit confirmation:
+
+| Action | Default | Setting |
+|--------|---------|---------|
+| Payments | Confirm | CONFIRM_PAYMENTS=true |
+| Orders | Confirm | CONFIRM_ORDERS=true |
+| SMS | Confirm | CONFIRM_SMS=true |
+
+---
+
+## ⚡ Automations
+
+### Available
+- Daily email summaries
+- GitHub commit summaries
+- Calendar event reminders
+- Task management
+
+### Config
 ```bash
 AUTO_EMAILS=true
 EMAIL_SCHEDULE=07:00,19:00
-```
-
-### 📊 GitHub Integration
-```bash
-GITHUB_REPO=yourusername/yourrepo
-GITHUB_TOKEN=ghp_xxx
+GITHUB_REPO=username/repo
 ```
 
 ---
 
-## 📱 Mobile UI Features
-
-- **Swipe-friendly** - Works great on phone
-- **Theme toggle** - Dark/Light mode
-- **Color picker** - Customize accent color
-- **Speech visual** - See Jarvis "thinking"
-- **Quick actions** - Tasks, Calendar, Auto, Gestures
-
----
-
-## 💰 Cost Breakdown
+## 💰 Cost: $0/Month
 
 | Component | Cost |
 |-----------|------|
 | Ollama (local AI) | **$0** |
 | pyttsx3 (TTS) | **$0** |
-| Whisper (STT) | **$0** |
-| Google APIs | **$0** (free tier) |
-| GitHub Actions | **$0** (2000 min/mo) |
-| **TOTAL** | **$0/month** |
+| SMS via Gmail | **$0** |
+| Brain Viz | **$0** |
+| All Features | **$0** |
+
+---
+
+## 🎛️ Configuration
+
+### UI Theme
+```bash
+UI_THEME=tron
+ACCENT_COLOR=#00ffff
+GRID_COLOR=#00ffff33
+```
+
+### Tone
+```bash
+JARVIS_TONE=humorous  # or sassy, formal, friendly
+```
+
+### Learning
+```bash
+SELF_LEARNING=true
+LEARNING_DB=jarvis_learning.json
+```
+
+---
+
+## 📱 Mobile Features
+
+- Responsive Tron design
+- Touch-optimized controls
+- Voice input button
+- Swipe navigation
 
 ---
 
 ## 🆘 Troubleshooting
 
-### "No AI provider"
-- Install Ollama: https://ollama.com
-- Run: `ollama serve`
-- Run: `ollama pull qwen3:8b`
+### "Food order not working"
+- Food agent is simulated - shows what would be ordered
+- Real ordering needs API keys for Walmart/Instacart
 
-### Voice not working
-- Linux: `sudo apt install espeak portaudio19-dev`
-- Windows: usually works automatically
-- Mac: `brew install portaudio`
+### "SMS not sending"
+- Needs Google OAuth setup
+- Or use carrier email gateway manually
 
-### Google not working
-- Need Client ID + Secret + Refresh Token
-- See docs/google-oauth.md for full walkthrough
+### "Brain viz not showing"
+- Check BRAIN_VIZ=true in config
 
 ---
 
@@ -181,31 +284,22 @@ GITHUB_TOKEN=ghp_xxx
 ```
 jarvis-unified/
 ├── jarvis/
-│   ├── core/         # AI engine, config
-│   ├── memory/       # Learning, todos, gestures
-│   ├── voice/        # TTS/STT
-│   ├── automation/   # Browser, files, gestures
-│   ├── api/          # Google services
-│   ├── ui/           # Web dashboard
-│   ├── main.py       # Entry point
-│   ├── .env.example  # Config template
-│   └── SETUP.md      # This guide
-├── requirements.txt
+│   ├── core/         # AI + Learning + Config
+│   ├── memory/       # Tasks + preferences
+│   ├── voice/       # TTS/STT
+│   ├── automation/   # Browser, gestures
+│   ├── api/          # Google + SMS
+│   ├── ui/           # Tron UI
+│   ├── main.py
+│   ├── .env.example
+│   └── SETUP.md
 └── README.md
 ```
 
 ---
 
-## ✅ What's Confirmed Free
+**Version:** 3.0  
+**Date:** April 2026  
+**Goal:** 100% free, fully featured, beautiful AI assistant
 
-- [x] Ollama + local models = 100% free forever
-- [x] pyttsx3 TTS = free offline
-- [x] Whisper STT = free local
-- [x] Google APIs = free tier
-- [x] All features included
-- [x] Mobile-friendly UI
-- [x] Cross-device control
-
-**Version:** 2.0  
-**Built:** April 2026  
-**Goal:** 100% free, fully featured AI assistant
+**SECURITY:** All payments/orders/SMS require explicit confirmation by default!
