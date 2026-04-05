@@ -1,225 +1,211 @@
-# 🛠️ Jarvis Unified - Setup Guide
+# 🤖 Jarvis Unified v2 - Complete Setup Guide
 
-A 100% FREE, modular AI assistant combining the best from 6 open-source projects.
-
----
-
-## 📋 Requirements
-
-- **Python 3.10+**
-- **Optional (for 100% free local AI):** [Ollama](https://ollama.com)
-- **Optional (for voice):** Microphone + speakers
+**100% FREE, modular AI assistant with all requested features**
 
 ---
 
-## 🚀 Quick Setup
+## ✅ What's Included (All Free!)
 
-### 1. Clone or Download
+| Feature | Status | Free? |
+|---------|--------|-------|
+| AI Chat (Ollama/Gemini/OpenRouter) | ✅ | YES - Ollama is 100% free |
+| Voice TTS/STT | ✅ | pyttsx3 is FREE |
+| Custom Tone (humorous/sassy/etc) | ✅ | YES |
+| Wake Commands | ✅ | YES |
+| Google Calendar | ✅ | YES (OAuth) |
+| Gmail Integration | ✅ | YES (OAuth) |
+| To-Do List | ✅ | YES |
+| Screen Share Toggle | ✅ | YES (on-demand) |
+| Gesture Learning | ✅ | YES |
+| Browser Control (Chrome/Edge) | ✅ | YES |
+| Automated Emails | ✅ | YES |
+| GitHub Commit Summary | ✅ | YES |
+| Mobile-Friendly UI | ✅ | YES |
+| Theme Customization | ✅ | YES |
+| Speech Visual Display | ✅ | YES |
+| Memory & Preferences | ✅ | YES |
 
+---
+
+## 🚀 Quick Setup (15 minutes)
+
+### 1. Clone
 ```bash
 git clone https://github.com/F0rger123/jarvis-unified.git
 cd jarvis-unified
 ```
 
-### 2. Create Virtual Environment
-
+### 2. Install
 ```bash
-# Create venv
 python3 -m venv venv
-
-# Activate
-# On Linux/Mac:
-source venv/bin/activate
-# On Windows:
-venv\Scripts\activate
+source venv/bin/activate  # or venv\Scripts\activate on Windows
+pip install -r jarvis/requirements.txt
 ```
 
-### 3. Install Dependencies
-
+### 3. Configure for 100% FREE
 ```bash
-pip install -r requirements.txt
+cp jarvis/.env.example jarvis/.env
 
-# Optional: Install all voice dependencies
-pip install pyttsx3 gTTS
-```
-
-### 4. Configure (Choose Your AI)
-
-#### Option A: 100% FREE (Local with Ollama) ⭐ RECOMMENDED
-
-```bash
+# EDIT .env - for completely FREE usage:
+# 
 # 1. Install Ollama (https://ollama.com)
-# 2. Start it: ollama serve
-# 3. Pull a free model:
-ollama pull qwen3:8b
-# or
-ollama pull llama3.2:3b
-
-# 4. In .env, set:
-OLLAMA_MODEL=qwen3:8b
+# 2. Run: ollama serve  
+# 3. Run: ollama pull qwen3:8b
+# 4. In .env set:
+#    AI_PROVIDER=ollama
+#    OLLAMA_MODEL=qwen3:8b
+# 
+# Leave other API keys EMPTY for 100% free mode!
 ```
 
-#### Option B: FREE API Tier (Google Gemini)
-
+### 4. Run
 ```bash
-# Get free key: https://aistudio.google.com/apikey
-# In .env:
-GEMINI_API_KEY=your_key_here
-GEMINI_MODEL=gemini-2.0-flash
+python jarvis/main.py --web
 ```
 
-#### Option C: OpenRouter (Some Free Models)
-
-```bash
-# Get key: https://openrouter.ai/keys
-# In .env:
-OPENROUTER_API_KEY=your_key_here
+### 5. Open Browser
 ```
-
-### 5. Copy & Edit .env
-
-```bash
-cp .env.example .env
-# Edit .env with your settings
-```
-
-### 6. Run
-
-```bash
-# Web UI mode (recommended for first time)
-python main.py --web
-
-# Interactive CLI mode
-python main.py
+http://localhost:5000
 ```
 
 ---
 
-## 📖 Usage
+## 🎛️ Features Guide
 
-### Web UI
-
-After running `python main.py --web`:
-1. Open http://localhost:5000
-2. Chat with Jarvis!
-3. Use the Tools tab for automation
-
-### CLI Mode
-
-```
-You: Hello Jarvis
-Jarvis: Hello! How can I help you today?
-
-You: What's the weather?
-Jarvis: I don't have weather access yet. Would you like me to add that?
-
-You: Create a file called test.txt with "Hello World"
-Jarvis: ✅ Created test.txt
-
-You: open https://google.com
-Jarvis: ✅ Opened https://google.com
-```
-
----
-
-## 🎤 Voice Setup (Optional)
-
+### 🎤 Voice Setup
 ```bash
 # Install voice dependencies
-pip install pyttsx3 gTTS
+pip install pyttsx3 pyaudio
 
-# Enable in .env:
+# In .env:
 TTS_ENGINE=pyttsx3
 STT_ENGINE=whisper
-WAKE_WORD=true
+WAKE_WORD=Jarvis
+CUSTOM_WAKE_COMMANDS=Hey Jarvis,Computer,Assistant
+```
+
+### 🎨 Customize Tone
+In `.env`:
+```bash
+JARVIS_TONE=humorous   # funny, adds jokes
+JARVIS_TONE=sassy     # direct, witty
+JARVIS_TONE=formal    # professional
+JARVIS_TONE=friendly  # warm
+```
+
+### 🎯 Customize UI
+```bash
+THEME=dark        # or light
+ACCENT_COLOR=#3b82f6  # any hex color
+SHOW_SPEECH_VISUAL=true
+```
+
+### 📅 Google Calendar/Gmail
+1. Go to https://console.cloud.google.com
+2. Create project → Enable Gmail API, Calendar API, Drive API
+3. Create OAuth credentials (Web application)
+4. Get Client ID + Secret → put in .env
+5. Get refresh token (see docs/google-oauth.md)
+6. Put refresh token in .env
+
+### 🌐 Browser Control
+```bash
+DEFAULT_BROWSER=chrome  # chrome, edge, firefox
+```
+
+### 👋 Gesture Learning
+Teach Jarvis hand gestures via the UI (Settings → Gestures)
+- "Wave left" → "previous window"
+- "Thumbs up" → "confirm"
+
+### 📺 Screen Share
+Toggle in UI - only activates when you turn it on (privacy!)
+
+### ⚡ Automations
+```bash
+AUTO_EMAILS=true
+EMAIL_SCHEDULE=07:00,19:00
+```
+
+### 📊 GitHub Integration
+```bash
+GITHUB_REPO=yourusername/yourrepo
+GITHUB_TOKEN=ghp_xxx
 ```
 
 ---
 
-## 📱 Remote Control (Phone → PC)
+## 📱 Mobile UI Features
 
-1. Enable in .env:
-```
-REMOTE_ENABLED=true
-REMOTE_PORT=8765
-```
-
-2. Run: `python main.py --web`
-
-3. From your phone, connect to `http://YOUR_PC_IP:5000`
+- **Swipe-friendly** - Works great on phone
+- **Theme toggle** - Dark/Light mode
+- **Color picker** - Customize accent color
+- **Speech visual** - See Jarvis "thinking"
+- **Quick actions** - Tasks, Calendar, Auto, Gestures
 
 ---
 
-## 🔧 Configuration Options
+## 💰 Cost Breakdown
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `OLLAMA_MODEL` | Local model to use | qwen3:8b |
-| `GEMINI_API_KEY` | Google AI key | (none) |
-| `OPENROUTER_API_KEY` | OpenRouter key | (none) |
-| `TTS_ENGINE` | pyttsx3/gtts/elevenlabs | pyttsx3 |
-| `MEMORY_DB` | SQLite database file | jarvis_memory.db |
-| `PORT` | Web UI port | 5000 |
+| Component | Cost |
+|-----------|------|
+| Ollama (local AI) | **$0** |
+| pyttsx3 (TTS) | **$0** |
+| Whisper (STT) | **$0** |
+| Google APIs | **$0** (free tier) |
+| GitHub Actions | **$0** (2000 min/mo) |
+| **TOTAL** | **$0/month** |
 
 ---
 
 ## 🆘 Troubleshooting
 
-### "No AI provider configured"
-- Make sure Ollama is running: `ollama serve`
-- Or add an API key to .env
-
-### "Module not found"
-- Run: `pip install -r requirements.txt`
+### "No AI provider"
+- Install Ollama: https://ollama.com
+- Run: `ollama serve`
+- Run: `ollama pull qwen3:8b`
 
 ### Voice not working
-- On Linux: `sudo apt install espeak`
-- On Windows: pyttsx3 usually works out of the box
+- Linux: `sudo apt install espeak portaudio19-dev`
+- Windows: usually works automatically
+- Mac: `brew install portaudio`
 
-### Port already in use
-- Change port: `python main.py --web --port 5001`
-
----
-
-## 📦 What's Included
-
-| Module | Source | Features |
-|--------|--------|----------|
-| Core AI | isair + OpenJarvis | Multi-model support, local-first |
-| Memory | isair + Mark-XXXV | Persistent SQLite storage |
-| Voice | isair + taskmaster | TTS (pyttsx3 free), wake word ready |
-| Automation | Mark-XXXV | Files, apps, terminal |
-| Google API | Mark-XXXV + OpenJarvis | Gmail, Calendar (OAuth) |
-| Web UI | danilofalcao + vierisid | Dashboard, chat, tools |
+### Google not working
+- Need Client ID + Secret + Refresh Token
+- See docs/google-oauth.md for full walkthrough
 
 ---
 
-## 🎯 Feature List
+## 📁 File Structure
 
-- [x] Chat with AI (multiple providers)
-- [x] File operations (create, read, move, delete)
-- [x] App launching
-- [x] Terminal command execution
-- [x] Web URL opening
-- [x] Persistent memory (SQLite)
-- [x] User preferences
-- [x] Web dashboard
-- [x] Google Calendar (OAuth setup needed)
-- [x] Gmail (OAuth setup needed)
-- [ ] Voice input (partially ready)
-- [ ] Wake word detection (placeholder)
-- [ ] MCP tools (placeholder)
-
----
-
-## 📝 Notes
-
-- **100% Free path:** Use Ollama + local models = $0 forever
-- **API fallback:** Works with Gemini, OpenRouter, OpenAI if needed
-- **Privacy-first:** isair's philosophy - your data stays local
+```
+jarvis-unified/
+├── jarvis/
+│   ├── core/         # AI engine, config
+│   ├── memory/       # Learning, todos, gestures
+│   ├── voice/        # TTS/STT
+│   ├── automation/   # Browser, files, gestures
+│   ├── api/          # Google services
+│   ├── ui/           # Web dashboard
+│   ├── main.py       # Entry point
+│   ├── .env.example  # Config template
+│   └── SETUP.md      # This guide
+├── requirements.txt
+└── README.md
+```
 
 ---
 
-**Version:** 1.0  
-**Built from:** 6 open-source Jarvis projects  
-**Goal:** Fully free, local, modular AI assistant
+## ✅ What's Confirmed Free
+
+- [x] Ollama + local models = 100% free forever
+- [x] pyttsx3 TTS = free offline
+- [x] Whisper STT = free local
+- [x] Google APIs = free tier
+- [x] All features included
+- [x] Mobile-friendly UI
+- [x] Cross-device control
+
+**Version:** 2.0  
+**Built:** April 2026  
+**Goal:** 100% free, fully featured AI assistant
