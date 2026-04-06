@@ -37,4 +37,4 @@ gTTS>=2.4.0
 # mcp>=1.0.0
 
 # Async support
-asyncio (built-in)
+asyncio (built-in)flask-cors

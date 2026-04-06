@@ -304,7 +304,7 @@ class Jarvis:
         self.ai = AIClient(self.config)
         
         # Memory & Learning
-        from jarvis.memory import Memory
+        from memory import Memory
         self.memory = Memory(self.config.config) if hasattr(self, 'config') else None
         self.learning = SelfLearningEngine(self.config.get('learning_db', 'jarvis_learning.json'))
         
