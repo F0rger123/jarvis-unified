@@ -36,7 +36,7 @@ class JarvisConfig:
             # === AI PROVIDERS - PRIORITY: GEMINI (FREE TIER) ===
             'ai_provider': os.getenv('AI_PROVIDER', 'gemini'),  # Changed default to gemini!
             'gemini_api_key': os.getenv('GEMINI_API_KEY', ''),
-            'gemini_model': os.getenv('GEMINI_MODEL', 'gemini-2.0-flash'),
+            'gemini_model': os.getenv('GEMINI_MODEL', 'gemini-2.0-flash-lite'),
             
             # Fallback: Ollama (local, optional)
             'ollama_url': os.getenv('OLLAMA_URL', 'http://localhost:11434'),
@@ -109,7 +109,7 @@ class GeminiClient:
     def __init__(self, config: JarvisConfig):
         self.config = config
         self.api_key = config.get('gemini_api_key')
-        self.model = config.get('gemini_model', 'gemini-2.0-flash')
+        self.model = config.get('gemini_model', 'gemini-2.0-flash-lite')
         self.provider = 'gemini'
         logger.info(f"Gemini client initialized with model: {self.model}")
     
