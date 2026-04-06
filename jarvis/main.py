@@ -3,7 +3,10 @@
 Jarvis Unified - Main Entry Point
 """
 import sys, os
+
+# Add both jarvis/ directory and parent to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import asyncio
 import argparse
