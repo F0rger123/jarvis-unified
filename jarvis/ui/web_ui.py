@@ -329,7 +329,7 @@ class JarvisMergeUI:
             try:
                 data = request.get_json()
                 message = data.get("message", "")
-        agent = data.get("agent", "general")
+                agent = data.get("agent", "general")
                 
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)

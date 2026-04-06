@@ -105,7 +105,7 @@ set SERVER_EXIT=%errorlevel%
 
 echo.
 echo ========================================
-echoServer exited with code: %SERVER_EXIT%
+ exited with code: %SERVER_EXIT%
 echo.
 
 :: Show error if any
