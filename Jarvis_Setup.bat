@@ -51,7 +51,7 @@ if exist "venv" (
 echo [3/6] Installing dependencies...
 
 call "venv\Scripts\activate.bat"
-call pip install flask flask-cors requests google-generativeai python-dotenv 2>> ..\error_log.txt
+call pip install schedule flask flask-cors requests google-generativeai python-dotenv 2>> ..\error_log.txt
 if errorlevel 1 (
     echo [ERROR] pip install failed!
     type ..\error_log.txt
