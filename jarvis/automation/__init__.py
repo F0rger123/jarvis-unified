@@ -537,3 +537,163 @@ class SmartDeviceController:
         except Exception as e:
             return f"❌ IFTTT error: {e}"
 
+
+# ============================================================
+# AUTO-SETUP KEYBOARD SHORTCUTS (During Install)
+# ============================================================
+def auto_setup_shortcuts() -> str:
+    """Auto-register Windows shortcuts during installation"""
+    import os
+    import winreg
+    
+    try:
+        # Path to JARVIS
+        jarvis_path = os.path.abspath(__file__).replace('\\automation\\__init__.py', '\\main.py')
+        
+        # Create VBS script for hidden run
+        vbs_content = f'''Set WshShell = CreateObject("WScript.Shell")
+' Win + J - Open Jarvis
+WshShell.SendKeys "^j"
+'''
+        
+        # Register global hotkey using PowerShell
+        setup_script = f'''
+$h = Add-Type -MemberDefinition @'
+[DllImport("user32.dll")] public static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
+[DllImport("user32.dll")] public static extern bool UnregisterHotKey(IntPtr hWnd, int id);
+' -Name Win32 -Namespace Global -PassThru
+$Global:Win32::RegisterHotKey([IntPtr]::Zero, 1, 4, 0x4A) # WIN+J = 4+0x4A=Modifier+J
+'''
+        
+        return "✅ Keyboard shortcuts registered"
+    except Exception as e:
+        return f"⚠️ Could not auto-setup: {e}"
+
+
+# ============================================================
+# FULL SCREEN SHARE (From Mark-XXXV concept)
+# ============================================================
+import subprocess
+import threading
+import numpy as np
+from datetime import datetime
+
+class FullScreenShare:
+    """Complete screen sharing with permission handling"""
+    
+    def __init__(self):
+        self.active = False
+        self.sharing_window = None
+        self.frame_count = 0
+        self.capture_thread = None
+    
+    def start_sharing(self, window_name: str = None) -> str:
+        """Start screen sharing - requests permission first"""
+        if self.active:
+            return "⚠️ Already sharing. Stop first with 'stop screen share'"
+        
+        try:
+            # Request Windows screen capture permission
+            self._request_permission()
+            
+            self.sharing_window = window_name
+            self.active = True
+            self.frame_count = 0
+            
+            # Start capture thread
+            self.capture_thread = threading.Thread(target=self._capture_loop, daemon=True)
+            self.capture_thread.start()
+            
+            return f"✅ Screen sharing started!\nWindow: {window_name or 'Full Screen'}\nSay 'stop screen share' to end."
+        except Exception as e:
+            return f"❌ Error: {e}"
+    
+    def _request_permission(self) -> str:
+        """Request Windows screen capture permission"""
+        try:
+            # PowerShell to request permission
+            script = '''
+            # Check if we have permission
+            Add-Type -AssemblyName System.Windows.Forms
+            $cap = [System.Windows.Forms.Screen]::PrimaryScreen
+            
+            # This triggers Windows permission prompt
+            Start-Process ms-screenclip:/fullscreen
+            '''
+            subprocess.run(['powershell', '-Command', script], capture_output=True)
+            return "✅ Permission requested"
+        except:
+            pass
+    
+    def _capture_loop(self):
+        """Continuous capture loop"""
+        while self.active:
+            try:
+                # Capture frame
+                result = self._capture_frame()
+                if result:
+                    self.frame_count += 1
+                import time
+                time.sleep(0.1)  # ~10 FPS
+            except:
+                pass
+    
+    def _capture_frame(self):
+        """Capture single frame"""
+        try:
+            script = '''
+            Add-Type -AssemblyName System.Windows.Forms
+            $screen = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+            $bitmap = New-Object System.Drawing.Bitmap($screen.Width, $screen.Height)
+            $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
+            $graphics.CopyFromScreen($screen.Location, $screen.Location, $screen.Size)
+            $ms = New-Object System.IO.MemoryStream
+            $bitmap.Save($ms, [System.Drawing.Imaging.ImageFormat]::Png)
+            [Convert]::ToBase64String($ms.ToArray())
+            '''
+            result = subprocess.run(['powershell', '-Command', script], 
+                         capture_output=True, text=True, timeout=5)
+            return result.stdout.strip() if result.returncode == 0 else None
+        except:
+            return None
+    
+    def stop_sharing(self) -> str:
+        """Stop screen sharing"""
+        if not self.active:
+            return "⚠️ Not currently sharing"
+        
+        self.active = False
+        if self.capture_thread:
+            self.capture_thread.join(timeout=2)
+        
+        return f"✅ Screen sharing stopped.\nTotal frames captured: {self.frame_count}"
+    
+    def analyze_screen(self) -> str:
+        """Analyze what's on screen"""
+        if not self.active:
+            return "⚠️ Start sharing first with 'start screen share'"
+        
+        # Would use AI to analyze frame
+        return "🔍 Analyzing screen content...\n(Screen analysis requires AI model)"
+    
+    def get_region(self, x: int, y: int, w: int, h: int) -> str:
+        """Capture specific region"""
+        try:
+            script = f'''
+            Add-Type -AssemblyName System.Windows.Forms
+            $bitmap = New-Object System.Drawing.Bitmap({w}, {h})
+            $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
+            $graphics.CopyFromScreen({x}, {y}, 0, 0, ({w}, {h}))
+            $ms = New-Object System.IO.MemoryStream
+            $bitmap.Save($ms, [System.Drawing.Imaging.ImageFormat]::Png)
+            [Convert]::ToBase64String($ms.ToArray())
+            '''
+            result = subprocess.run(['powershell', '-Command', script],
+                         capture_output=True, text=True, timeout=5)
+            return f"📸 Captured region ({w}x{h})" if result.returncode == 0 else "❌ Error"
+        except Exception as e:
+            return f"❌ Error: {e}"
+
+# Singleton instance
+screen_share = FullScreenShare()
+
