@@ -2,14 +2,14 @@
 setlocal EnableDelayedExpansion
 
 :: ============================================================
-:: JARVIS v10.1-DEBUG - Shows REAL errors
+:: JARVIS v10.4-IMPORTFIX - Shows REAL errors
 :: ============================================================
 cd /d "%~dp0"
 title Jarvis Setup - DEBUG MODE
 
 echo.
 echo ╔═══════════════════════════════════════════════════════════╗
-echo ║              🤖 JARVIS v10.1-DEBUG                       ║
+echo ║              🤖 JARVIS v10.4-IMPORTFIX                       ║
 echo ╚═══════════════════════════════════════════════════════════╝
 echo.
 

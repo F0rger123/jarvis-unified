@@ -35,9 +35,9 @@ async def main():
     
     if args.web:
         # FIXED: Use relative import
-        from ui.web_ui import JarvisTronUI
+        from ui.web_ui import JarvisMergeUI
         print(f"\n🌐 Starting on http://{args.host}:{args.port}")
-        ui = JarvisTronUI(jarvis, config.config)
+        ui = JarvisMergeUI(jarvis, config.config)
         ui.run(host=args.host, port=args.port)
     else:
         print("\n💬 Interactive mode. Type 'quit' to exit.\n")
