@@ -181,7 +181,7 @@ async function send(){
     const response = await fetch('/api/chat', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({message: '[' + currentAgent + '] ' + msg})
+      body: JSON.stringify({message: msg, agent: currentAgent})
     });
     
     if(!response.ok) throw new Error('HTTP ' + response.status);
@@ -324,11 +324,12 @@ class JarvisMergeUI:
             import asyncio
             try:
                 data = request.get_json()
-                message = data.get('message', '') if data else ''
+                message = data.get("message", "")
+        agent = data.get("agent", "general")
                 
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
-                response = loop.run_until_complete(self.jarvis.process(message))
+                response = loop.run_until_complete(self.jarvis.process(message, agent=agent))
                 loop.close()
                 
                 return jsonify({'response': response})

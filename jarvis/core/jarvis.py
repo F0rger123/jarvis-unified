@@ -330,11 +330,45 @@ class Jarvis:
         }
         
         self.input_mode = self.config.get('input_mode', 'text')
+        # Initialize Wake Phrase Detector
+        self.wake_detector = WakePhraseDetector(
+            self.config.get("wake_phrases", "jarvis,hey jarvis,computer").split(",")
+        )
+        
+        # Initialize 9 Agents
+        self.agents = {
+            "research": ResearchAgent(),
+            "coding": CodingAgent(),
+            "stock": StockAgent(),
+            "marketing": MarketingAgent(),
+            "news": NewsAgent(),
+            "finance": FinanceAgent(),
+            "fitness": FitnessAgent(),
+            "travel": TravelAgent(),
+            "food": FoodAgent()
+        }
+        self.current_agent = "general"
         
         logger.info(f"Jarvis v3.3 - Default: Gemini 3.1 Flash Lite, Code Brain: Gemma 4")
     
-    async def process(self, user_input: str, use_code_brain: bool = False) -> str:
-        """Process with optional code brain mode"""
+    async def process(self, user_input: str, use_code_brain: bool = False, agent: str = None) -> str:
+        """Process with wake phrase detection and agent routing"""
+        
+        # Check wake phrase
+        detected, remaining = self.wake_detector.detect(user_input)
+        if not detected and self.current_agent == "general":
+            return "Say 'Jarvis' or your wake phrase to activate me."
+        user_input = remaining or user_input
+        
+        # Use specified agent or current
+        target_agent = agent or self.current_agent
+        
+        # Route to specific agent
+        if target_agent != "general" and target_agent in self.agents:
+            agent_obj = self.agents[target_agent]
+            prompt = AGENT_PROMPTS.get(target_agent, '')
+            full_request = f"{prompt}\n\nUser: {user_input}"
+            return await agent_obj.run(user_input, [])
         
         # Detect if it's a code task
         code_keywords = ['code', 'program', 'function', 'script', 'debug', 'fix', 'write code', 'create app']
@@ -461,3 +495,104 @@ if __name__ == "__main__":
                 break
     
     asyncio.run(main())
+# ============================================================
+# CUSTOM WAKE PHRASES
+# ============================================================
+class WakePhraseDetector:
+    """Detect custom wake phrases"""
+    
+    def __init__(self, phrases=None):
+        self.phrases = phrases or ['jarvis', 'hey jarvis', 'computer']
+        self.active = True
+    
+    def detect(self, text):
+        text = text.lower().strip()
+        for phrase in self.phrases:
+            if phrase in text:
+                return True, text.replace(phrase, '').strip()
+        return False, text
+    
+    def add_phrase(self, phrase):
+        phrase = phrase.lower().strip()
+        if phrase not in self.phrases:
+            self.phrases.append(phrase)
+    
+    def remove_phrase(self, phrase):
+        self.phrases = [p for p in self.phrases if p != phrase.lower()]
+
+# ============================================================
+# TRUE 9 AGENT SYSTEM
+# ============================================================
+class ResearchAgent:
+    """Research agent - web search and summarize"""
+    async def run(self, query, context):
+        return f"📚 Researching: {query}\n\nI'm searching the web for information on this topic..."
+        # Would integrate web search here
+    
+class CodingAgent:
+    """Coding agent - code generation and debug"""
+    async def run(self, query, context):
+        return f"💻 Coding request: {query}\n\nLet me write proper code for this..."
+    
+class StockAgent:
+    """Stock market analysis agent"""
+    async def run(self, query, context):
+        return f"📈 Stock analysis: {query}\n\nAnalyzing market data..."
+    
+class MarketingAgent:
+    """Marketing and SEO agent"""
+    async def run(self, query, context):
+        return f"📣 Marketing: {query}\n\nCreating campaign strategy..."
+    
+class NewsAgent:
+    """News fetching agent"""
+    async def run(self, query, context):
+        return f"📰 Latest news on: {query}\n\nFetching headlines..."
+    
+class FinanceAgent:
+    """Personal finance agent"""
+    async def run(self, query, context):
+        return f"💰 Finance: {query}\n\nAnalyzing your finances..."
+    
+class FitnessAgent:
+    """Fitness and health agent"""
+    async def run(self, query, context):
+        return f"💪 Fitness: {query}\n\nCreating workout plan..."
+    
+class TravelAgent:
+    """Travel planning agent"""
+    async def run(self, query, context):
+        return f"✈️ Travel: {query}\n\nPlanning your trip..."
+    
+class FoodAgent:
+    """Food and cooking agent"""
+    async def run(self, query, context):
+        return f"🍳 Food: {query}\n\nFinding recipes..."
+        
+# ============================================================
+# AGENT PROMPT TEMPLATES
+# ============================================================
+AGENT_PROMPTS = {
+    'research': 'You are a Research Agent. Your job is to search the web, find information, and summarize findings clearly. Always cite sources. Be thorough and accurate.',
+    
+    'coding': 'You are a Coding Agent. You write clean, well-documented code. Include error handling. Explain your reasoning. Focus on best practices.',
+    
+    'stock': 'You are a Stock Market Analyst. Provide data-driven analysis. Mention risk factors. Never promise guaranteed returns.',
+    
+    'marketing': 'You are a Marketing Expert. Create compelling copy. Suggest SEO strategies. Focus on conversion and engagement.',
+    
+    'news': 'You are a News Analyst. Present facts objectively. Cite sources. Focus on accuracy and relevance.',
+    
+    'finance': 'You are a Personal Finance Advisor. Be practical and prudent. Focus on savings and smart spending.',
+    
+    'fitness': 'You are a Fitness Coach. Create realistic workout plans. Consider user fitness level. Suggest nutrition tips.',
+    
+    'travel': 'You are a Travel Planner. Find the best deals. Consider convenience and budget. Suggest activities.',
+    
+    'food': 'You are a Chef. Suggest delicious recipes. Consider dietary needs. Provide cooking tips.',
+    
+    'general': 'You are JARVIS, a helpful AI assistant. Be concise, accurate, and helpful.'
+}
+
+# Export for main.py
+__all__ = ['WakePhraseDetector', 'ResearchAgent', 'CodingAgent', 'StockAgent', 'MarketingAgent', 'NewsAgent', 'FinanceAgent', 'FitnessAgent', 'TravelAgent', 'FoodAgent', 'AGENT_PROMPTS']

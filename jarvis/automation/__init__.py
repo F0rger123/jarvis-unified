@@ -271,3 +271,59 @@ def quick_sms(number: str, msg: str) -> str:
     for carrier in SMS_CARRIERS:
         return send_sms_via_gmail(number, msg, carrier)
     return send_sms_via_gmail(number, msg, 'verizon')
+
+# ============================================================
+# BROWSER CONTROLLER - Chrome, Edge, Firefox
+# ============================================================
+import webbrowser
+import subprocess
+import os
+
+class BrowserController:
+    """Control Chrome, Edge, Firefox"""
+    
+    BROWSERS = {
+        'chrome': ['google-chrome', 'chrome', 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'],
+        'edge': ['microsoft-edge', 'msedge', 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe'],
+        'firefox': ['firefox', 'C:\\Program Files\\Mozilla Firefox\\firefox.exe'],
+    }
+    
+    @staticmethod
+    def open_url(url: str, browser: str = None) -> str:
+        """Open URL in specified browser"""
+        try:
+            if browser:
+                browsers = BrowserController.BROWSERS.get(browser.lower(), [])
+                for b in browsers:
+                    try:
+                        subprocess.Popen([b, url])
+                        return f"✅ Opened {url} in {browser}"
+                    except:
+                        continue
+            # Fallback to default
+            webbrowser.open(url)
+            return f"✅ Opened {url} in default browser"
+        except Exception as e:
+            return f"❌ Error: {e}"
+    
+    @staticmethod
+    def open_chrome(url: str, incognito: bool = False) -> str:
+        """Open in Chrome"""
+        args = ['--new-window'] if incognito else []
+        try:
+            subprocess.Popen(['google-chrome', url] + args)
+            return f"✅ Opened {url} in Chrome"
+        except:
+            webbrowser.open(url)
+            return f"✅ Opened in Chrome/Default"
+    
+    @staticmethod
+    def open_edge(url: str) -> str:
+        """Open in Edge"""
+        try:
+            subprocess.Popen(['microsoft-edge', url])
+            return f"✅ Opened {url} in Edge"
+        except:
+            webbrowser.open(url)
+            return f"✅ Opened in Edge/Default"
+
