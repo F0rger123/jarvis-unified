@@ -2,15 +2,16 @@
 """
 Jarvis Unified - Main Entry Point
 """
-import sys, os
+import sys
+import os
 
-# Add both jarvis/ directory and parent to path
+# Add current directory to path - FIXES IMPORT ERRORS
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import asyncio
 import argparse
 
+# FIXED: Use relative imports (NOT jarvis.core)
 from core.jarvis import JarvisConfig, Jarvis
 
 def parse_args():
@@ -23,7 +24,7 @@ def parse_args():
 async def main():
     args = parse_args()
     
-    print("🤖 Jarvis v3.3")
+    print("🤖 Jarvis v10.0-FINAL")
     print("=" * 40)
     
     config = JarvisConfig('.env')
@@ -33,6 +34,7 @@ async def main():
     print(f"Code Brain: Gemma 4 - {'ON' if config.get('use_gemma_for_code') else 'OFF'}")
     
     if args.web:
+        # FIXED: Use relative import
         from ui.web_ui import JarvisTronUI
         print(f"\n🌐 Starting on http://{args.host}:{args.port}")
         ui = JarvisTronUI(jarvis, config.config)
