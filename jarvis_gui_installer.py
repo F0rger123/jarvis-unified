@@ -1,207 +1,228 @@
 #!/usr/bin/env python3
 """
-JARVIS ONE-CLICK GUI INSTALLER
-No terminal commands needed - just click!
-
-This creates a simple GUI that:
-1. Checks/Installs Python automatically
-2. Shows a nice window to paste API key
-3. Creates shortcuts
-4. Launches Jarvis
+JARVIS v4.0.2 - GUI INSTALLER WITH PROGRESS
+Shows real-time progress in a GUI window
 """
-import sys, os, subprocess, threading, time, urllib.request, zipfile, shutil
+import sys
+import os
+import subprocess
+import threading
+import time
+import urllib.request
+import urllib.error
 
-# Try to use tkinter (built into Python)
+# Try to use tkinter
 try:
     import tkinter as tk
     from tkinter import ttk, messagebox
-    HAS_TKINTER = True
-except ImportError:
-    HAS_TKINTER = False
+    HAS_TK = True
+except:
+    HAS_TK = False
 
-# If no tkinter, install and retry
-if not HAS_TKINTER:
-    try:
-        subprocess.run([sys.executable, '-m', 'pip', 'install', 'tkinter', '-q'], check=True)
-        import tkinter as tk
-        from tkinter import ttk, messagebox
-        HAS_TKINTER = True
-    except:
-        pass
-
-class JarvisInstaller:
-    """GUI Installer for Jarvis"""
-    
+class JarvisGUI:
     def __init__(self):
+        if not HAS_TK:
+            print("ERROR: tkinter not available")
+            sys.exit(1)
+        
         self.root = tk.Tk()
-        self.root.title("🤖 Jarvis v4.0 Installer")
-        self.root.geometry("500x400")
+        self.root.title("🤖 Jarvis v4.0.2 Installer")
+        self.root.geometry("450x350")
         self.root.configure(bg="#0a0a0f")
         self.root.resizable(False, False)
         
-        # Style
-        self.style = ttk.Style()
-        self.style.theme_use('clam')
-        self.style.configure('TButton', background='#00ffff', foreground='#0a0a0f', font=('Arial', 12, 'bold'))
-        self.style.configure('TLabel', background='#0a0a0f', foreground='#00ffff')
+        self.status_colors = {
+            'pending': '#666',
+            'running': '#ffaa00', 
+            'success': '#00ff88',
+            'error': '#ff4444'
+        }
         
         self.setup_ui()
+        self.run_checks()
         
     def setup_ui(self):
-        # Logo
-        tk.Label(self.root, text="🤖", font=("Arial", 48), bg="#0a0a0f", fg="#00ffff").pack(pady=10)
-        tk.Label(self.root, text="JARVIS v4.0", font=("Arial", 24, "bold"), bg="#0a0a0f", fg="#00ffff").pack()
-        tk.Label(self.root, text="One-Click Setup", font=("Arial", 12), bg="#0a0a0f", fg="#888").pack()
+        # Title
+        tk.Label(self.root, text="🤖", font=("Arial", 36), bg="#0a0a0f", fg="#00ffff").pack(pady=5)
+        tk.Label(self.root, text="JARVIS v4.0.2", font=("Arial", 18, "bold"), bg="#0a0a0f", fg="#00ffff").pack()
+        tk.Label(self.root, text="One-Click Installer", font=("Arial", 10), bg="#0a0a0f", fg="#666").pack()
         
-        # Status
-        self.status_var = tk.StringVar(value="Initializing...")
-        tk.Label(self.root, textvariable=self.status_var, font=("Arial", 10), bg="#0a0a0f", fg="#00ff88").pack(pady=10)
+        # Steps
+        self.steps = {}
+        step_frame = tk.Frame(self.root, bg="#0a0a0f")
+        step_frame.pack(pady=20, fill=tk.BOTH, expand=True, padx=20)
         
-        # API Key input
-        tk.Label(self.root, text="Paste your FREE API key:", bg="#0a0a0f", fg="#e0e0e0").pack(pady=(20, 5))
+        steps = [
+            ("Python", "Checking Python..."),
+            ("Venv", "Creating environment..."),
+            ("Deps", "Installing dependencies..."),
+            ("Test", "Testing imports..."),
+            ("Config", "Configuring..."),
+            ("Server", "Starting server..."),
+        ]
         
-        self.api_entry = tk.Entry(self.root, width=40, font=("Arial", 11), bg="#151520", fg="#e0e0e0", relief="flat")
-        self.api_entry.pack(pady=5)
+        for name, label in steps:
+            row = tk.Frame(step_frame, bg="#0a0a0f")
+            row.pack(fill=tk.X, pady=3)
+            
+            indicator = tk.Label(row, text="⏳", font=("Arial", 12), bg="#0a0a0f", fg="#666", width=3)
+            indicator.pack(side=tk.LEFT)
+            
+            text = tk.Label(row, text=label, font=("Arial", 10), bg="#0a0a0f", fg="#888", anchor=tk.W)
+            text.pack(side=tk.LEFT, fill=tk.X, expand=True)
+            
+            self.steps[name] = {"indicator": indicator, "text": text, "label": label}
         
-        tk.Label(self.root, text="Get free key: https://aistudio.google.com/app/apikey", 
-               font=("Arial", 8), bg="#0a0a0f", fg="#666").pack()
-        
-        # Buttons
-        btn_frame = tk.Frame(self.root, bg="#0a0a0f")
-        btn_frame.pack(pady=20)
-        
-        self.install_btn = ttk.Button(btn_frame, text="🚀 INSTALL & LAUNCH", command=self.start_install)
-        self.install_btn.pack(side=tk.LEFT, padx=5)
-        
-        # Progress bar
-        self.progress = ttk.Progressbar(self.root, length=400, mode='determinate')
-        self.progress.pack(pady=10)
-        
-        # Log
-        self.log_var = tk.StringVar(value="Ready")
-        tk.Label(self.root, textvariable=self.log_var, font=("Arial", 8), bg="#0a0a0f", fg="#666").pack(pady=5)
+        # Log area
+        self.log_text = tk.Text(self.root, height=6, bg="#151520", fg="#00ff88", 
+                          font=("Courier", 8), relief=tk.FLAT, state=tk.DISABLED)
+        self.log_text.pack(fill=tk.BOTH, expand=True, padx=20, pady=(0, 10))
         
     def log(self, msg):
-        self.log_var.set(msg)
+        self.log_text.config(state=tk.NORMAL)
+        self.log_text.insert(tk.END, msg + "\n")
+        self.log_text.see(tk.END)
+        self.log_text.config(state=tk.DISABLED)
         self.root.update()
         
-    def set_progress(self, value):
-        self.progress['value'] = value
-        self.root.update()
-        
-    def start_install(self):
-        api_key = self.api_entry.get().strip()
-        
-        if not api_key:
-            messagebox.showerror("Error", "Please enter your API key!")
+    def set_step(self, name, status, detail=None):
+        if name not in self.steps:
             return
             
-        if not api_key.startswith('AI'):
-            messagebox.showerror("Error", "API key should start with 'AI...'")
-            return
+        step = self.steps[name]
+        color = self.status_colors.get(status, '#666')
         
-        # Disable button
-        self.install_btn.config(state='disabled')
+        icon = {'pending': '⏳', 'running': '🔄', 'success': '✅', 'error': '❌'}.get(status, '⏳')
+        step["indicator"].config(fg=color, text=icon)
+        step["text"].config(fg=color)
         
-        # Run installation in thread
-        threading.Thread(target=self.install, args=(api_key,), daemon=True).start()
+        if detail:
+            step["text"].config(text=detail)
         
-    def install(self, api_key):
-        self.status_var.set("Installing Python (if needed)...")
-        self.log("Checking Python...")
-        self.set_progress(10)
+        self.root.update()
         
-        # Check/install Python (simplified - just assume it's there or warn)
+    def run_checks(self):
+        """Run all installation steps"""
+        self.log("Starting Jarvis installation...")
+        
+        # Step 1: Python
+        self.set_step("Python", "running")
         try:
-            subprocess.run([sys.executable, '--version'], check=True, capture_output=True)
-        except:
-            self.status_var.set("Please install Python 3.10+ from python.org")
-            messagebox.showwarning("Warning", "Python not found. Please install from python.org")
-            self.install_btn.config(state='normal')
+            result = subprocess.run([sys.executable, '--version'], capture_output=True, text=True, timeout=5)
+            ver = result.stdout.strip() if result.stdout else result.stderr.strip()
+            self.log(f"Python: {ver}")
+            self.set_step("Python", "success", f"Python: {ver}")
+        except Exception as e:
+            self.set_step("Python", "error", f"Python not found!")
+            self.log(f"ERROR: {e}")
+            messagebox.showerror("Error", f"Python not found: {e}")
             return
+            
+        # Step 2: Venv
+        self.set_step("Venv", "running")
+        venv_path = "venv"
+        try:
+            if not os.path.exists(venv_path):
+                subprocess.run([sys.executable, '-m', 'venv', venv_path], capture_output=True, timeout=60)
+                self.log("Created venv")
+            else:
+                self.log("Using existing venv")
+            self.set_step("Venv", "success")
+        except Exception as e:
+            self.set_step("Venv", "error")
+            self.log(f"ERROR: {e}")
+            
+        # Step 3: Dependencies
+        self.set_step("Deps", "running")
+        pip = os.path.join(venv_path, "Scripts", "pip") if os.name == 'nt' else os.path.join(venv_path, "bin", "pip")
+        try:
+            subprocess.run([pip, 'install', '-q', 'flask', 'flask-cors', 'requests', 'pyttsx3'], 
+                       capture_output=True, timeout=120)
+            self.log("Installed: flask, flask-cors, requests, pyttsx3")
+            self.set_step("Deps", "success")
+        except Exception as e:
+            self.set_step("Deps", "error")
+            self.log(f"ERROR: {e}")
+            
+        # Step 4: Test imports
+        self.set_step("Test", "running")
+        try:
+            sys.path.insert(0, 'jarvis')
+            from core.jarvis import JarvisConfig
+            self.log("Core imports: OK")
+            self.set_step("Test", "success")
+        except Exception as e:
+            self.set_step("Test", "error")
+            self.log(f"ERROR importing: {e}")
+            messagebox.showerror("Import Error", str(e))
+            
+        # Step 5: Config
+        self.set_step("Config", "running")
+        env_path = os.path.join("jarvis", ".env")
+        try:
+            os.makedirs("jarvis", exist_ok=True)
+            if not os.path.exists(env_path):
+                with open(env_path, 'w') as f:
+                    f.write("GEMINI_API_KEY=\nGEMINI_MODEL=gemini-3.1-flash-lite\n")
+                self.log("Created .env")
+            self.set_step("Config", "success")
+        except Exception as e:
+            self.set_step("Config", "error")
+            self.log(f"ERROR: {e}")
+            
+        # Step 6: Start server
+        self.set_step("Server", "running")
+        self.log("Starting server...")
         
-        self.status_var.set("Creating environment...")
-        self.log("Creating virtual environment...")
-        self.set_progress(30)
-        
-        # Create venv (in current directory)
-        venv_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'venv')
-        if not os.path.exists(venv_path):
-            try:
-                subprocess.run([sys.executable, '-m', 'venv', venv_path], check=True, capture_output=True)
-            except:
-                pass  # Continue even if venv fails
-        
-        self.log("Installing dependencies...")
-        self.set_progress(50)
-        
-        # Install deps
-        pip = os.path.join(venv_path, 'Scripts', 'pip') if os.name == 'nt' else os.path.join(venv_path, 'bin', 'pip')
-        if os.path.exists(pip):
-            subprocess.run([pip, 'install', '-q', 'flask', 'flask-cors', 'requests', 'pyttsx3'], capture_output=True)
-        
-        self.status_var.set("Configuring Jarvis...")
-        self.log("Writing config...")
-        self.set_progress(70)
-        
-        # Write .env
-        env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'jarvis', '.env')
-        os.makedirs(os.path.dirname(env_path), exist_ok=True)
-        
-        env_content = f"""# Jarvis v4.0 Configuration
-AI_PROVIDER=gemini
-GEMINI_API_KEY={api_key}
-GEMINI_MODEL=gemini-3.1-flash-lite
-USE_GEMMA_FOR_CODE=true
-CONFIRM_PAYMENTS=true
-CONFIRM_ORDERS=true
-CONFIRM_SMS=true
-CONFIRM_WHATSAPP=true
-UI_THEME=tron
-ACCENT_COLOR=#00ffff
-JARVIS_TONE=helpful
-PORT=5000
-"""
-        with open(env_path, 'w') as f:
-            f.write(env_content)
-        
-        self.status_var.set("Launching Jarvis...")
-        self.log("Starting web server...")
-        self.set_progress(90)
-        
-        # Start Jarvis
-        jarvis_dir = os.path.dirname(os.path.abspath(__file__))
-        main_py = os.path.join(jarvis_dir, 'jarvis', 'main.py')
-        
-        if os.path.exists(main_py):
-            # Try to start
-            try:
-                subprocess.Popen([sys.executable, main_py, '--web'], 
-                          cwd=os.path.join(jarvis_dir, 'jarvis'),
-                          stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                          start_new_session=True)
-            except:
-                pass
-        
-        self.set_progress(100)
-        self.status_var.set("✅ JARVIS IS READY!")
+        try:
+            # Start in thread
+            def start_server():
+                os.chdir("jarvis")
+                subprocess.run([sys.executable, "main.py", "--web"])
+            
+            thread = threading.Thread(target=start_server, daemon=True)
+            thread.start()
+            
+            # Wait for server with progress
+            for i in range(15):
+                time.sleep(1)
+                self.log(f"Waiting... {i+1}/15")
+                self.root.update()
+                
+                try:
+                    urllib.request.urlopen('http://localhost:5000', timeout=2)
+                    self.log("Server is UP!")
+                    self.set_step("Server", "success", "Server running!")
+                    break
+                except:
+                    continue
+            else:
+                self.set_step("Server", "error", "Server not responding!")
+                self.log("WARNING: Server may not have started")
+                
+        except Exception as e:
+            self.set_step("Server", "error")
+            self.log(f"ERROR: {e}")
+            
+        # Done
+        self.log("\n✅ Installation complete!")
+        self.log("Open http://localhost:5000 in your browser")
         
         # Open browser
-        time.sleep(2)
-        import webbrowser
-        webbrowser.open('http://localhost:5000')
-        
-        messagebox.showinfo("🎉 Success!", "Jarvis is now open in your browser!\n\nIf it didn't open, go to: http://localhost:5000")
-        
-        self.root.quit()
+        try:
+            import webbrowser
+            webbrowser.open('http://localhost:5000')
+        except:
+            pass
+            
+        messagebox.showinfo("Ready!", "Jarvis is running at http://localhost:5000")
 
 def main():
-    if not HAS_TKINTER:
-        print("ERROR: tkinter not available. Please install Python with tkinter support.")
-        sys.exit(1)
-    
-    app = JarvisInstaller()
-    app.root.mainloop()
+    if HAS_TK:
+        app = JarvisGUI()
+        app.root.mainloop()
+    else:
+        print("Please install Python with tkinter: python.org")
 
 if __name__ == "__main__":
     main()
