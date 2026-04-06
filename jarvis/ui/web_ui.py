@@ -147,6 +147,10 @@ body::after{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:r
 <div class="setting-row"><span>WhatsApp</span><input type="checkbox" id="whatsapp"></div>
 <div class="setting-row"><span>SMS Gateway</span><input type="checkbox" id="sms"></div>
 <div class="setting-row"><span>API Key</span><input type="password" id="apiKey" placeholder="Enter API key..."></div>
+<div class="setting-row"><span>Reminders</span><input type="checkbox" id="reminders"></div>
+<div class="setting-row"><span>Web Search</span><input type="checkbox" id="websearch"></div>
+<div class="setting-row"><span>Screenshots</span><input type="checkbox" id="screenshots"></div>
+<div class="setting-row"><span>Smart Devices</span><input type="checkbox" id="smartdevices"></div>
 <button class="agent-btn" onclick="saveSettings()">Save Settings</button>
 </div>
 </div>

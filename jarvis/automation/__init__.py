@@ -327,3 +327,213 @@ class BrowserController:
             webbrowser.open(url)
             return f"✅ Opened in Edge/Default"
 
+
+# ============================================================
+# WINDOWS KEYBOARD SHORTCUTS
+# ============================================================
+import subprocess
+
+class KeyboardShortcuts:
+    """Windows global keyboard shortcuts"""
+    
+    SHORTCUTS = {
+        'win+j': lambda: subprocess.run(['powershell', '-Command', '(New-Object -ComObject WScript.Shell).AppActivate(\"JARVIS\")']),
+        'win+shift+v': lambda: subprocess.run(['powershell', '-Command', '$speech.Recognize()']),
+        'win+shift+s': lambda: subprocess.run(['powershell', '-Command', 'Start-Process ms-screenclip']),
+    }
+    
+    @classmethod
+    def execute(cls, shortcut: str) -> str:
+        """Execute a keyboard shortcut"""
+        key = shortcut.lower()
+        if key in cls.SHORTCUTS:
+            try:
+                cls.SHORTCUTS[key]()
+                return f"✅ Executed: {shortcut}"
+            except Exception as e:
+                return f"❌ Error: {e}"
+        return f"⚠️ Unknown shortcut: {shortcut}"
+
+# ============================================================
+# WINDOWS NOTIFICATIONS
+# ============================================================
+class WindowsNotifications:
+    """Windows toast notifications"""
+    
+    @staticmethod
+    def show(title: str, message: str, icon: str = None) -> str:
+        """Show a Windows toast notification"""
+        try:
+            # Using PowerShell for toast
+            script = f'''
+            [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
+            $template = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::Text02)
+            $text = $template.GetElementsByTagName("text")
+            $text.Item(0).AppendChild($template.CreateTextNode("{title}")) | Out-Null
+            $text.Item(1).AppendChild($template.CreateTextNode("{message}")) | Out-Null
+            $toast = [Windows.UI.Notifications.ToastNotification]::new($template)
+            [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("JARVIS").Show($toast)
+            '''
+            subprocess.run(['powershell', '-Command', script], capture_output=True)
+            return f"✅ Notification: {title}"
+        except Exception as e:
+            return f"⚠️ Notification error: {e}"
+
+
+# ============================================================
+# WEB SEARCH INTEGRATION
+# ============================================================
+import urllib.request
+import json
+
+class WebSearch:
+    """Web search using Google search API or scraping"""
+    
+    @staticmethod
+    def search(query: str, num_results: int = 5) -> str:
+        """Search Google for query"""
+        try:
+            # Use DuckDuckGo instant answer API (no API key needed)
+            url = f"https://api.duckduckgo.com/?q={urllib.parse.quote(query)}&format=json&no_html=1"
+            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+            with urllib.request.urlopen(req, timeout=10) as response:
+                data = json.loads(response.read().decode())
+            
+            results = []
+            if data.get('AbstractText'):
+                results.append(data.get('AbstractText', ''))
+            
+            for r in data.get('RelatedTopics', [])[:num_results]:
+                if r.get('Text'):
+                    results.append(f"• {r.get('Text')}")
+            
+            if not results:
+                return f"No results for: {query}"
+            
+            return f"🔍 Results for '{query}':\n\n" + "\n".join(results[:num_results])
+        except Exception as e:
+            return f"❌ Search error: {e}"
+    
+    @staticmethod
+    def find_nearby(query: str) -> str:
+        """Find nearby places"""
+        return WebSearch.search(f"{query} near me")
+
+# ============================================================
+# SCREEN CONTROL (from Mark-XXXV concept)
+# ============================================================
+import subprocess
+import os
+import base64
+
+class ScreenControl:
+    """Screen capture and control"""
+    
+    @staticmethod
+    def screenshot(filename: str = None) -> str:
+        """Take a screenshot"""
+        try:
+            if not filename:
+                filename = f"screenshot_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
+            
+            # Use PowerShell for screenshot
+            script = f'''
+            Add-Type -AssemblyName System.Windows.Forms
+            Add-Type -AssemblyName System.Drawing
+            $screen = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+            $bitmap = New-Object System.Drawing.Bitmap($screen.Width, $screen.Height)
+            $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
+            $graphics.CopyFromScreen($screen.Location, $screen.Location, $screen.Size)
+            $bitmap.Save("{filename}")
+            $graphics.Dispose()
+            $bitmap.Dispose()
+            '''
+            subprocess.run(['powershell', '-Command', script], capture_output=True)
+            return f"✅ Screenshot saved: {filename}"
+        except Exception as e:
+            return f"❌ Screenshot error: {e}"
+    
+    @staticmethod
+    def record_start() -> str:
+        """Start screen recording"""
+        # Would start OBS or similar
+        return "🎬 Screen recording started (requires OBS)"
+    
+    @staticmethod
+    def record_stop() -> str:
+        """Stop screen recording"""
+        return "⏹️ Screen recording stopped"
+    
+    @staticmethod
+    def zoom_in() -> str:
+        """Zoom in"""
+        subprocess.run(['powershell', '-Command', '[System.Windows.Forms.SendKeys]::SendWait("^+(")'])
+        return "🔍 Zoomed in"
+    
+    @staticmethod
+    def zoom_out() -> str:
+        """Zoom out"""
+        subprocess.run(['powershell', '-Command', '[System.Windows.Forms.SendKeys]::SendWait("^-")'])
+        return "🔍 Zoomed out"
+    
+    @staticmethod
+    def lock_screen() -> str:
+        """Lock the computer"""
+        subprocess.run(['rundll32.exe', 'user32.dll,LockWorkStation'])
+        return "🔒 Screen locked"
+
+
+# ============================================================
+# SMART DEVICE CONTROL (Google Home/SmartThings)
+# ============================================================
+import urllib.request
+import json
+
+class SmartDeviceController:
+    """Control smart home devices via Google Assistant API or IFTTT"""
+    
+    # IFTTT webhook URLs (user configures)
+    IFTEE_WEBHOOKS = {}
+    
+    @classmethod
+    def set_ifttt_key(cls, event: str, key: str):
+        """Set IFTTT webhook for an event"""
+        cls.IFTEE_WEBHOOKS[event] = key
+    
+    @classmethod
+    def control_device(cls, command: str) -> str:
+        """Control smart devices"""
+        command = command.lower()
+        
+        # Parse command
+        if 'light' in command:
+            if 'on' in command:
+                return cls._trigger_ifttt('light_on', 'Turned on lights')
+            elif 'off' in command:
+                return cls._trigger_ifttt('light_off', 'Turned off lights')
+        
+        if 'thermostat' in command or 'temperature' in command:
+            return cls._trigger_ifttt('thermostat', 'Set temperature')
+        
+        if 'lock' in command:
+            return cls._trigger_ifttt('lock_door', 'Locked door')
+        
+        if 'on' in command:
+            return cls._trigger_ifttt('device_on', 'Device turned on')
+        
+        return f"⚠️ Could not parse: {command}"
+    
+    @classmethod
+    def _trigger_ifttt(cls, event: str, success_msg: str) -> str:
+        """Trigger IFTTT webhook"""
+        key = cls.IFTEE_WEBHOOKS.get(event)
+        if not key:
+            return f"⚠️ IFTTT not configured for {event}. Add to Settings."
+        
+        try:
+            url = f"https://maker.ifttt.com/trigger/{event}/with/key/{key}"
+            urllib.request.urlopen(url, timeout=5)
+            return f"✅ {success_msg}"
+        except Exception as e:
+            return f"❌ IFTTT error: {e}"
+

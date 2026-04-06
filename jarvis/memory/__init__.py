@@ -251,3 +251,77 @@ class Memory:
     
     def close(self):
         self.store.close()
+# ============================================================
+# SCHEDULED REMINDERS
+# ============================================================
+import schedule
+import threading
+import time as time_module
+
+class ReminderScheduler:
+    """Schedule reminders with SQLite storage"""
+    
+    def __init__(self, conn):
+        self.conn = conn
+        conn.execute('''CREATE TABLE IF NOT EXISTS reminders (
+            id INTEGER PRIMARY KEY, task TEXT, due_time TEXT, 
+            repeat TEXT, active INTEGER DEFAULT 1)''')
+        conn.commit()
+        self.scheduler_thread = None
+        self.running = False
+    
+    def add(self, task, due_time, repeat='once'):
+        """Add a reminder"""
+        conn.execute('INSERT INTO reminders (task, due_time, repeat) VALUES (?,?,?)',
+                   (task, due_time, repeat))
+        conn.commit()
+        return f"✅ Reminder set: {task} at {due_time}"
+    
+    def list(self):
+        """List all reminders"""
+        cursor = conn.execute('SELECT id, task, due_time, repeat FROM reminders WHERE active=1')
+        return [{'id':r[0],'task':r[1],'due':r[2],'repeat':r[3]} for r in cursor.fetchall()]
+    
+    def delete(self, reminder_id):
+        """Delete a reminder"""
+        conn.execute('UPDATE reminders SET active=0 WHERE id=?', (reminder_id,))
+        conn.commit()
+        return "✅ Reminder deleted"
+    
+    def check_due(self):
+        """Check for due reminders"""
+        now = datetime.now().isoformat()[:16]
+        cursor = conn.execute("SELECT id, task FROM reminders WHERE active=1 AND due_time LIKE ?", (now[:13]+'%',))
+        return [r for r in cursor.fetchall()]
+
+# ============================================================
+# SCHEDULED EMAILS  
+# ============================================================
+class ScheduledEmail:
+    """Schedule automated emails"""
+    
+    def __init__(self, conn):
+        self.conn = conn
+        conn.execute('''CREATE TABLE IF NOT EXISTS scheduled_emails (
+            id INTEGER PRIMARY KEY, to_email TEXT, subject TEXT, body TEXT,
+            schedule_time TEXT, repeat TEXT, active INTEGER DEFAULT 1)''')
+        conn.commit()
+    
+    def add(self, to, subject, body, time, repeat='daily'):
+        """Schedule an email"""
+        conn.execute('INSERT INTO scheduled_emails VALUES (?,?,?,?,?,1)',
+                   (to, subject, body, time, repeat))
+        conn.commit()
+        return f"✅ Email scheduled: {to} at {time}"
+    
+    def list(self):
+        """List scheduled emails"""
+        cursor = conn.execute('SELECT id, to_email, subject, schedule_time FROM scheduled_emails WHERE active=1')
+        return [{'id':r[0],'to':r[1],'subject':r[2],'time':r[3]} for r in cursor.fetchall()]
+    
+    def delete(self, email_id):
+        """Delete scheduled email"""
+        conn.execute('UPDATE scheduled_emails SET active=0 WHERE id=?', (email_id,))
+        conn.commit()
+        return "✅ Scheduled email deleted"
+

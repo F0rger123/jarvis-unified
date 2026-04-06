@@ -386,3 +386,43 @@ class BrowserController:
     
     def get_browsers(self) -> List[str]:
         return ['chrome', 'edge', 'firefox', 'default']
+# ============================================================
+# FULL CALENDAR CONTROL
+# ============================================================
+    def create_event(self, title: str, start_time: str, end_time: str = None, location: str = None) -> str:
+        """Create a calendar event"""
+        event = {
+            "summary": title,
+            "start": {"dateTime": start_time, "timeZone": "America/New_York"},
+        }
+        if end_time:
+            event["end"] = {"dateTime": end_time, "timeZone": "America/New_York"}
+        if location:
+            event["location"] = location
+        
+        result = self._api_request("POST", "/calendar/v3/calendars/primary/events", json=event)
+        if 'error' in result:
+            return f"❌ Error: {result.get('error', {}).get('message', 'Unknown')}"
+        return f"✅ Event created: {title}"
+    
+    def update_event(self, event_id: str, title: str = None, start: str = None) -> str:
+        """Update an event"""
+        updates = {}
+        if title:
+            updates["summary"] = title
+        if start:
+            updates["start"] = {"dateTime": start, "timeZone": "America/New_York"}
+        
+        if not updates:
+            return "⚠️ No updates provided"
+        
+        result = self._api_request("PATCH", f"/calendar/v3/calendars/primary/events/{event_id}", json=updates)
+        if 'error' in result:
+            return f"❌ Error: {result.get('error', {}).get('message', 'Unknown')}"
+        return f"✅ Event updated: {title or event_id}"
+    
+    def delete_event(self, event_id: str) -> str:
+        """Delete an event"""
+        result = self._api_request("DELETE", f"/calendar/v3/calendars/primary/events/{event_id}")
+        return "✅ Event deleted" if result == "" else f"❌ Error: {result}"
+
